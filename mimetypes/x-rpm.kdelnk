@@ -1,0 +1,8 @@
+# KDE Config File
+[KDE Desktop Entry]
+MimeType=application/x-rpm
+Comment=RPM Package
+DefaultApp=kpackage
+Icon=rpmfile.xpm
+Type=MimeType
+Patterns=*.rpm;

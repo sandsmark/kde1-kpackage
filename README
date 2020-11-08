@@ -1,0 +1,38 @@
+Kpackage handles RPM and Debian packages, it is used
+for displaying currently installed packages, uninstalling
+them and installing new ones. 
+
+INSTALLATION
+------------
+It should be possible to do an installation by doing
+	./configure
+	make install
+in the top directory.
+
+For installing kpackage you need: 
+
+       Qt 1.31 or above 
+       recent KDE libraries 
+
+For listing Debian packages no other software is needed but to install and 
+unistall the packages you need: 
+
+       the DPKG package manager installed 
+
+For dealing with Redhat packages you need: 
+
+       RPM 2.3.4 or above 
+       RPM-Devel 2.3.4 or above 
+       Ithe same libraries as compiling rpm does. These are: 
+              libdb - the Berkley database library 
+              libz and libz-dev  - compression library 
+              Later versions of RPM require the gettext routine which is 
+                found in libc6 or in libintl 
+
+Also, for kpackage to work correctly with RPM packages the RPM database 
+must be initialised. If typing `rpm -qa' gives an error about 
+`unable to open....` then try `rpm --rebuilddb'. 
+
+
+Toivo Pedaste (toivo@ucs.uwa.edu.au)
+

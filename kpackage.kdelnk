@@ -1,0 +1,12 @@
+# KDE Config File
+[KDE Desktop Entry]
+Name=kpackage
+MimeType=application/x-rpm;application/x-debian-package;
+Comment=kpackage RPM and DEB manager
+Exec=kpackage -caption "%c" %i %m %u
+Icon=kpackage.xpm
+Type=Application
+DocPath=kpackage/index.html 
+Terminal=0
+TerminalOptions=
+Path=

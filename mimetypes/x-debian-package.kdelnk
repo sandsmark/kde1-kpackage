@@ -1,0 +1,8 @@
+# KDE Config File
+[KDE Desktop Entry]
+MimeType=application/x-debian-package
+Comment=Debian Package
+DefaultApp=kpackage
+Icon=debfile.xpm
+Type=MimeType
+Patterns=*.deb;

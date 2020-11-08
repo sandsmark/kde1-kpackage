@@ -81,15 +81,7 @@ add_definitions(-DVERSION="0.91" -DPACKAGE="KPackage")
 
 install(TARGETS kpackage RUNTIME DESTINATION ${KDE1_BINDIR})
 
-install_icon(kpackage.xpm)
 install(FILES kpackage.kdelnk DESTINATION ${KDE1_APPSDIR}/Utilities/)
-
-install(FILES
-    kexplorer.xpm delete.xpm editcopy.xpm filedel.xpm filenew.xpm findf.xpm
-    folder.xpm folder_open.xpm help.xpm kpackage.xpm mini-lower.xpm reload.xpm
-    sort_name.xpm sort_size.xpm stop.xpm view_percent.xpm view_real_size.xpm
-    view_used_size.xpm folder_excl.xpm openbook.xpm
-    DESTINATION ${KDE1_ICONDIR}/ )
 
 # Generic icons
 install(FILES

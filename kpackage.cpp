@@ -7,7 +7,7 @@
 // See kpackage.h for more information.
 //////////////////////////////////////////////////////////////////////
 
-#include "../config.h"
+#include "config.h"
 extern "C"
 {
 #include <time.h>

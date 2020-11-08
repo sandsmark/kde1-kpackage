@@ -6,7 +6,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "../config.h"
+#include "config.h"
 // Standard headers
 #include <stdlib.h>
 
@@ -42,7 +42,7 @@ packageInfo::packageInfo(QDict<QString> *_info, pkgInterface *type)
   item = NULL;
   packageState = UNSET;
   updated = FALSE;
-  url = QString::null;
+  url = 0;
 }
 
 // Another constructor, for a packge with a url
@@ -195,7 +195,7 @@ QString packageInfo::getNdigElement(QString s, int *pos)
       }
     }
   } else {
-    str  = QString::null;
+    str  = 0;
     nf = ni;
   }
   //  printf("s=%s %d %s\n",s.mid(nf,999).data(),nf,str.data());

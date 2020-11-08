@@ -8,7 +8,7 @@
 #ifndef DEB_IFACE_H
 #define DEB_IFACE_H
 
-#include "../config.h"
+#include "config.h"
 
 #include <qlist.h>
 #include <kprocess.h>

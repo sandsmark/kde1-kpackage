@@ -6,7 +6,7 @@
 #ifndef KTVITEM_H
 #define KTVITEM_H
 
-#include "../config.h"
+#include "config.h"
 // Standard Headers
 
 // Qt Headers

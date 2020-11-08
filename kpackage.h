@@ -34,7 +34,7 @@
 #ifndef KPACKAGE_H
 #define KPACKAGE_H
 
-#include "../config.h"
+#include "config.h"
 
 // Standard Headers
 #include <stdio.h>

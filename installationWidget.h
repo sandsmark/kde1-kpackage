@@ -10,7 +10,7 @@
 #ifndef INSTALLATION_WIDGET
 #define INSTALLATION_WIDGET
 
-#include "../config.h"
+#include "config.h"
 // Qt Headers
 #include <qframe.h>
 #include <qlayout.h>

@@ -7,7 +7,7 @@
 #include "qobject.h"
 #include "qfile.h"
 #include "qtextstream.h"
-#include "../config.h"
+#include "config.h"
 
 #if QT_VERSION >= 200
 #include <kio_job.h>

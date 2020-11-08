@@ -6,7 +6,7 @@
 //
 // This is the entry point to the program
 ///////////////////////////////////////////////////////////////////////////////
-#include "../config.h"
+#include "config.h"
 #include "kpackage.h"
 
 #include <kapp.h>

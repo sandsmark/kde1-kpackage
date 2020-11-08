@@ -3,7 +3,7 @@
 #ifndef H_VERIFY
 #define H_VERIFY
 
-#include "../config.h"
+#include "config.h"
 extern "C++"
 {
 #include <qlist.h>

@@ -6,7 +6,7 @@
 #ifndef FINDF_H
 #define FINDF_H
 
-#include "../config.h"
+#include "config.h"
 
 // Standard Headers
 #include <stdio.h>

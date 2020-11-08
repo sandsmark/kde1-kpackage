@@ -23,7 +23,7 @@
 
 #ifndef PACKAGEINFO_H
 #define PACKAGEINFO_H
-#include "../config.h"
+#include "config.h"
 
 #include <qdict.h>
 #include <qstring.h>

@@ -16,7 +16,7 @@
 #ifndef MANAGEMENTWIDGET_H
 #define MANAGEMENTWIDGET_H
 
-#include "../config.h"
+#include "config.h"
 // Standard Headers
 
 // Qt Headers

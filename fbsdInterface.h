@@ -8,7 +8,7 @@
 #ifndef FBSD_IFACE_H
 #define FBSD_IFACE_H
 
-#include "../config.h"
+#include "config.h"
 
 //#ifdef HAVE_FBSD_PKGTOOLS
 

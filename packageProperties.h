@@ -11,7 +11,7 @@
 
 #ifndef PACKAGEPROPERTIES_H
 #define PACKAGEPROPERTIES_H
-#include "../config.h"
+#include "config.h"
 
 // Standard Headers
 

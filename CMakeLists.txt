@@ -77,7 +77,7 @@ target_link_libraries(kpackage
     X11::X11
 )
 
-add_definitions(-DVERSION=\"0.91\")
+add_definitions(-DVERSION="0.91" -DPACKAGE="KPackage")
 
 install(TARGETS kpackage RUNTIME DESTINATION ${KDE1_BINDIR})
 
@@ -90,3 +90,53 @@ install(FILES
     sort_name.xpm sort_size.xpm stop.xpm view_percent.xpm view_real_size.xpm
     view_used_size.xpm folder_excl.xpm openbook.xpm
     DESTINATION ${KDE1_ICONDIR}/ )
+
+# Generic icons
+install(FILES
+    pics/cross.xpm
+    pics/dbad.xpm
+    pics/deb.xpm
+    pics/dnew.xpm
+    pics/dupdated.xpm
+    pics/ptick.xpm
+    pics/question.xpm
+    pics/rnew.xpm
+    pics/rpm.xpm
+    pics/rupdated.xpm
+    pics/kiss.xpm
+    pics/knew.xpm
+    pics/kupdated.xpm
+    pics/slack.xpm
+    pics/snew.xpm
+    pics/supdated.xpm
+    DESTINATION ${KDE1_DATADIR}/kpackage/pics/
+    )
+
+# Toolbar icons
+install(FILES
+    toolbar/findf.xpm
+    toolbar/ftin.xpm
+    toolbar/ftout.xpm
+    DESTINATION ${KDE1_DATADIR}/kpackage/toolbar/
+    )
+
+# Icons
+install(FILES
+    mini-icon/kpackage.xpm
+    mini-icon/debfile.xpm
+    mini-icon/rpmfile.xpm
+
+    DESTINATION ${KDE1_MINIDIR}
+    )
+install(FILES
+    mini-icon/kpackage.xpm
+    mini-icon/debfile.xpm
+    mini-icon/rpmfile.xpm
+    DESTINATION ${KDE1_ICONDIR}
+    )
+
+install(FILES
+    mimetypes/x-debian-package.kdelnk
+    mimetypes/x-rpm.kdelnk
+    DESTINATION ${KDE1_MIMEDIR}/application
+    )

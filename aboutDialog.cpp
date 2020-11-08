@@ -8,7 +8,7 @@
 // information
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "../config.h"
+#include "config.h"
 // Qt headers
 #include <qlabel.h>
 #include <qlayout.h>
@@ -31,8 +31,8 @@ aboutDialog::aboutDialog(QWidget *parent, const char *name)
   okButton = new QPushButton(i18n("OK"), this);
 
   // Create the labels
-  QLabel *line1 = new QLabel(PACKAGE,this);
-  QLabel *line2 = new QLabel("Version "VERSION,this);
+  QLabel *line1 = new QLabel("KPackage",this);
+  QLabel *line2 = new QLabel("Version 0.1",this);
   QLabel *line3 = new QLabel(i18n("By Toivo Pedaste"),this);
   QLabel *line3a = new QLabel(i18n("Originally: Damyan Pepper"),this);
   QLabel *line3b = new QLabel(i18n("Addional Developers:"),this);

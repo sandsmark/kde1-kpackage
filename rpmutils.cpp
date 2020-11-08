@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////         
 // 	$Id: rpmutils.cpp 20304 1999-04-25 13:27:08Z toivo $	
 //
-#include "../config.h"
+#include "config.h"
 #ifdef HAVE_RPM
 #include <klocale.h>
  

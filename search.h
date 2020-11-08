@@ -6,7 +6,7 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include "../config.h"
+#include "config.h"
 
 // Standard Headers
 #include <stdio.h>

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////         
 //      $Id: rpmutils.h 16726 1999-02-11 04:18:43Z toivo $ 
 //
-#include "../config.h"
+#include "config.h"
 #include <string.h>
 
 extern "C"

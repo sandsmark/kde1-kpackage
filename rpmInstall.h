@@ -3,7 +3,7 @@
 #define _H_INSTALL
 
 #include <stdio.h>
-#include "../config.h"
+#include "config.h"
 
 class QString;
 

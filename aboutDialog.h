@@ -11,7 +11,7 @@
 #ifndef ABOUTDIALOG_H
 #define ABOUTDIALOG_H
 
-#include "../config.h"
+#include "config.h"
 // Qt headers
 #include <qdialog.h>
 #include <qpushbt.h>

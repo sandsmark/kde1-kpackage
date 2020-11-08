@@ -3,7 +3,7 @@
 //
 // Author: Toivo Pedaste
 //
-#include "../config.h"
+#include "config.h"
 
 #include "kpackage.h"
 #include "pkgInterface.h"

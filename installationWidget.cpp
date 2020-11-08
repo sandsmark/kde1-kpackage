@@ -6,7 +6,7 @@
 // Two panel installation widget
 //
 
-#include "../config.h"
+#include "config.h"
 // KDE headers
 #include <kurl.h>
 

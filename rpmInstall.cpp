@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////
 //     $Id: rpmInstall.cpp 20996 1999-05-07 14:13:11Z toivo $
-#include "../config.h"
+#include "config.h"
 
 #ifdef HAVE_RPM
 

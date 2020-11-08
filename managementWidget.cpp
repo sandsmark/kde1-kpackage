@@ -6,7 +6,7 @@
 //
 // See managementWidget.h for more information
 
-#include "../config.h"
+#include "config.h"
 
 #include "knewpanner.h"
 // kpackage.headers

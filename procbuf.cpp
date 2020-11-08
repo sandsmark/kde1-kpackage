@@ -3,7 +3,7 @@
 //
 // Author: Toivo Pedaste
 //
-#include "../config.h"
+#include "config.h"
 #include "procbuf.h"
 #include <kprocess.h>
 #include <kmsgbox.h>

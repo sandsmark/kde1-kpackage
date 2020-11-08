@@ -4,7 +4,7 @@
 // Author: Toivo Pedaste
 //
 
-#include "../config.h"
+#include "config.h"
 #include <stdio.h>
 #include "kpackage.h"
 #include "packageProperties.h"

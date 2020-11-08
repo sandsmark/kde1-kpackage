@@ -3,7 +3,7 @@
 //
 // Author: Toivo Pedaste
 //
-#include "../config.h"
+#include "config.h"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -223,7 +223,7 @@ void SLACK::listInstalledPackages(QList<packageInfo> *pki)
 	fn = dr + fi->fileName();
 	file = fopen(fn.data(),"r");
 	if (file) {
-          vb = QString::null;
+          vb = 0;
 	  while (fgets(linebuf,sizeof(linebuf),file)) {
 	    if (strcmp(linebuf,FILELIST)) {
 	      vb += linebuf;
@@ -318,7 +318,7 @@ packageInfo *SLACK::getPackageInfo(char mode, const char *name, const char *vers
     fn += name;
     file = fopen(fn.data(),"r");
     if (file) {
-      vb = QString::null;
+      vb = 0;
       while (fgets(linebuf,sizeof(linebuf),file)) {
 	if (strcmp(linebuf,FILELIST)) {
 	  vb += linebuf;

@@ -7,7 +7,7 @@
 #ifndef PKG_IFACE_H
 #define PKG_IFACE_H
 
-#include "../config.h"
+#include "config.h"
 #include <qlist.h>
 #include <qstring.h>
 

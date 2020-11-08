@@ -3,7 +3,7 @@
 //
 // Author: Toivo Pedaste
 //
-#include "../config.h"
+#include "config.h"
 #include <kprocess.h>
 #include <qdialog.h> 
 #include <qobject.h> 

@@ -6,7 +6,7 @@
 // Author: Toivo Pedaste
 //
 
-#include "../config.h"
+#include "config.h"
 // qt headers
 #include <qlabel.h>
 
@@ -155,8 +155,8 @@ void pkginstallOptionsWidgetMult::setup(QList<packageInfo> *pl, QString type)
  QString s;
 
   packList = pl;
-  s = i18n("Install: %1 %2 Packages").arg(packList->count()).arg(type);
-  title->setText(s);
+  s.sprintf(i18n("Install: %d %s Packages"),packList->count(),type.data());
+  title->setText(s.data());
 }
 
 void pkginstallOptionsWidgetMult::pkginstallButtonClicked()

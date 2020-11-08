@@ -2,7 +2,7 @@
 #ifndef H_MESSAGES
 #define H_MESSAGES
 
-#include "../config.h"
+#include "config.h"
 /* all the rest of what was here moved to rpmlib.h */
 
 #ifndef  RPMTAG_EPOCH

@@ -3,7 +3,7 @@
 //
 // Author: Toivo Pedaste
 //
-#include "../config.h"
+#include "config.h"
 #include "pkguninstallDialog.h"
 #include "pkgInterface.h"
 #include "kpackage.h"
@@ -85,9 +85,9 @@ void pkguninstallDialog::setup(packageInfo *p)
   QString s;
 
   package = p;
-  s = i18n("Uninstall: %1\n")
-  	  .arg(*package->getProperty("name"));
-  label->setText(s);
+  s.sprintf(i18n("Uninstall: %s\n"),
+          package->getProperty("name")->data());
+  label->setText(s.data());
 }
 
 void pkguninstallDialog::uninstallClicked()
@@ -127,8 +127,8 @@ void pkguninstallDialogMult::setup(QList<packageInfo> *pl, QString type)
   QString s;
 
   packList = pl;
-  s = i18n("Uninstall: %1 %2 Packages\n").arg(packList->count()).arg(type);
-  label->setText(s);
+  s.sprintf(i18n("Uninstall: %d %s Packages\n"),packList->count(),type.data());
+  label->setText(s.data());
 }
 
 void pkguninstallDialogMult::uninstallClicked()

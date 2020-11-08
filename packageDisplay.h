@@ -21,7 +21,7 @@
 
 #ifndef PACKAGEDISPLAY_H
 #define PACKAGEDISPLAY_H
-#include "../config.h"
+#include "config.h"
 
 // Qt Headers
 #include <qframe.h>

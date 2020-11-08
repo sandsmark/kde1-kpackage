@@ -12,7 +12,7 @@
 
 #include <kurl.h>
 
-#include "../config.h"
+#include "config.h"
 #include "packageInfo.h"
 
 class Locations;

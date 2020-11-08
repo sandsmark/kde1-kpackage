@@ -12,7 +12,7 @@
 #ifndef PKGINSTALL_OPTIONS
 #define PKGINSTALL_OPTIONS
 
-#include "../config.h"
+#include "config.h"
 // Qt headers
 #include <qframe.h>
 #include <qlayout.h>

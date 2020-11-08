@@ -8,7 +8,7 @@
 #ifndef KISS_IFACE_H
 #define KISS_IFACE_H
 
-#include "../config.h"
+#include "config.h"
 
 #include <qlist.h>
 #include <kprocess.h>

@@ -3,7 +3,7 @@
 //
 // Author: Toivo Pedaste
 //
-#include "../config.h"
+#include "config.h"
 #ifdef HAVE_RPM
 extern "C"
 {
@@ -830,7 +830,7 @@ void RPM::setAvail(LcacheObj *slist)
   int RPM::install(int installFlags, packageInfo *p){return 0;}
   int RPM::doinst(int installFlags, char *files[]){return 0;}
 
-  QString RPM::FindFile(const char *name){return QString::null;;}
+  QString RPM::FindFile(const char *name){return 0;;}
   void RPM::collectDepends(packageInfo *p, const char *name, int src){}
   bool RPM::parseName(QString name, QString *n, QString *v){return 0;}
 

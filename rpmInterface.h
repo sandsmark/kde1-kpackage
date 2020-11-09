@@ -16,7 +16,10 @@ extern "C"
   #include <rpm/rpmlib.h>
 }
 #else
-  typedef struct  Header{
+#ifndef __cplusplus
+  typedef
+#endif
+struct  Header{
 };
 #endif
 

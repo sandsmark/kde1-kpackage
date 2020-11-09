@@ -4,7 +4,7 @@
 #include "pkgInterface.h"
 #include <vector>
 #include <string>
-#include <unordered_set>
+#include <set>
 
 typedef struct __alpm_handle_t alpm_handle_t;
 typedef struct __alpm_db_t alpm_db_t;
@@ -65,7 +65,7 @@ private:
     std::vector<std::string> m_repos;
 
     // I don't understand QListT, so just do it manually
-    std::unordered_set<alpmPackageInfo*> m_instantiated;
+    std::set<alpmPackageInfo*> m_instantiated;
 };
 
 #endif // ALPMINTERFACE_H

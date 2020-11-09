@@ -43,7 +43,13 @@ managementWidget::~managementWidget()
 
 void managementWidget::resizeEvent(QResizeEvent *re)
 {
-  arrangeWidgets();
+    arrangeWidgets();
+}
+
+void managementWidget::closeEvent(QCloseEvent *)
+{
+    installedPackages->clear();
+
 }
 
 

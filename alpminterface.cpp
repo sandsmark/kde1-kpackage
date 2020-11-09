@@ -43,7 +43,7 @@ alpmInterface::alpmInterface()
 
 alpmInterface::~alpmInterface()
 {
-    std::unordered_set<alpmPackageInfo*>::iterator it = m_instantiated.begin();
+    std::set<alpmPackageInfo*>::iterator it = m_instantiated.begin();
     while (it != m_instantiated.end()) {
         (*it)->interface = NULL;
         delete *it;

@@ -16,6 +16,7 @@
 #include "kissInterface.h"
 #include "slackInterface.h"
 #include "fbsdInterface.h"
+#include "alpminterface.h"
 #ifdef HAVE_RPM
 #include "rpmInterface.h"
 #endif
@@ -28,9 +29,9 @@ KIconLoader  *globalKIL;
 Params *params;
 
 #ifdef HAVE_RPM
-  const int kpinterfaceN = 5;
+  const int kpinterfaceN = 6;
 #else
-  const int kpinterfaceN = 4;
+  const int kpinterfaceN = 5;
 #endif
 pkgInterface *kpinterface[kpinterfaceN];
  
@@ -47,8 +48,9 @@ int main(int argc, char **argv)
   kpinterface[1] = new KISS();
   kpinterface[2] = new fbsdInterface();
   kpinterface[3] = new SLACK(); // Also catched BSD packages...
+  kpinterface[4] = new alpmInterface;
 #ifdef HAVE_RPM
-  kpinterface[4] = new RPM();
+  kpinterface[5] = new RPM();
 #endif
 
   if ( app->isRestored() ) {

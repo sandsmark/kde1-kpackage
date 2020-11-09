@@ -8,11 +8,15 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 find_package(Qt1 REQUIRED)
 find_package(KDE1 REQUIRED)
 find_package(X11 REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(alpm REQUIRED IMPORTED_TARGET libalpm)
 
 include(CMakePackageConfigHelpers)
 include(Qt1Macros)
 include(KDE1Macros)
 include(KDE1InstallDirs)
+include(GNUInstallDirs)
 
 option(ENABLE_SANITIZERS "Enable runtime sanitizing (for development)")
 if (ENABLE_SANITIZERS)
@@ -61,6 +65,8 @@ add_executable(kpackage
     options.cpp pkginstallOptions.cpp aboutDialog.cpp packageInfo.cpp cache.cpp
     main.cpp utils.cpp kio.cpp updateLoc.cpp procbuf.cpp ktvitem.cpp
 
+    alpminterface.cpp
+
     debInterface.cpp pkgInterface.cpp  rpmInterface.cpp kissInterface.cpp
     slackInterface.cpp fbsdInterface.cpp rpmInstall.cpp rpmVerify.cpp
     rpmutils.cpp rpmMessages.c
@@ -75,9 +81,13 @@ target_link_libraries(kpackage
     ${KDE1_KFILE}
     Qt::Qt1
     X11::X11
+    PkgConfig::alpm
 )
 
+set(ROOTDIR "/" CACHE STRING "Default root directory")
 add_definitions(-DVERSION="0.91" -DPACKAGE="KPackage")
+add_definitions(-DDBPATH=\"${CMAKE_INSTALL_LOCALSTATEDIR}/lib/pacman\")
+add_definitions(-DROOTDIR=\"${ROOTDIR}\")
 
 install(TARGETS kpackage RUNTIME DESTINATION ${KDE1_BINDIR})
 

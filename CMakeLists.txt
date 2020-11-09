@@ -104,6 +104,7 @@ install(FILES
     pics/question.xpm
     pics/rnew.xpm
     pics/rpm.xpm
+    pics/package.xpm
     pics/rupdated.xpm
     pics/kiss.xpm
     pics/knew.xpm

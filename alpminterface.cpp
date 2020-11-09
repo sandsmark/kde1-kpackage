@@ -28,7 +28,7 @@ alpmInterface::alpmInterface()
     queryMsg = i18n("Querying package list: ");
     typeID = "/alpm";
 
-    icon = "rpm.xpm";
+    icon = "package.xpm";
     pict = new QPixmap();
     *pict = globalKIL->loadIcon(icon);
     bad_pict = new QPixmap();
@@ -98,6 +98,8 @@ param *alpmInterface::inituninstallOptions()
 
 packageInfo *alpmInterface::getPackageInfo(char mode, const char *name, const char *version)
 {
+    (void)mode; // it's 'i' if its installed, idgaf
+
     if (!m_handle) {
         return NULL;
     }
@@ -134,6 +136,10 @@ QListT<char> *alpmInterface::getFileList(packageInfo *p)
         if (!files->files[i].name) {
             continue;
         }
+        // We have to do this song and dance because:
+        //  a) alpm doesn't prefix with /
+        //  b) we need to return a char*
+        //  c) we can't use malloc or new char[] because QListT doesn't like that.
         char *name = (char*)operator new(strlen(files->files[i].name) + 2);
         name[0] = '\0';
         name = strcat(name, "/");
@@ -267,7 +273,7 @@ void alpmInterface::parseDatabase(alpm_db_t *db, QListT<packageInfo> *pki)
         alpm_pkg_t *pkg = reinterpret_cast<alpm_pkg_t*>(it->data);
 
         packageInfo *info = createInfo(pkg);
-        info->update(pki, typeID, false);
+        info->update(pki, typeID, alpm_pkg_get_origin(pkg) == ALPM_PKG_FROM_LOCALDB);
     }
 }
 
@@ -308,6 +314,8 @@ packageInfo *alpmInterface::createInfo(alpm_pkg_t *pkg)
     data->insert("version", new QString(alpm_pkg_get_version(pkg)));
     data->insert("packager", new QString(alpm_pkg_get_packager(pkg)));
     data->insert("description", new QString(alpm_pkg_get_desc(pkg)));
+    data->insert("filename", new QString(alpm_pkg_get_filename(pkg)));
+    data->insert("url", new QString(alpm_pkg_get_url(pkg)));
     QString sizeStr;
     sizeStr.setNum(alpm_pkg_get_isize(pkg));
     data->insert("size", new QString(sizeStr));

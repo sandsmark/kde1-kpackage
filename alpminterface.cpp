@@ -96,6 +96,36 @@ packageInfo *alpmInterface::getPackageInfo(char mode, const char *name, const ch
     if (!m_handle) {
         return NULL;
     }
+    alpm_db_t *db = alpm_get_localdb(m_handle);
+    if (!db) {
+        fprintf(stderr, "Failed loading local database: %s\n", alpm_strerror(alpm_errno(m_handle)));
+        return NULL; // todo; could probably check the others, but if you don't have local ur fukd
+    }
+    packageInfo *info = NULL;
+    alpm_pkg_t *pkg = alpm_db_get_pkg(db, name);
+    if (strcmp(alpm_pkg_get_version(pkg), version) == 0) {
+        info = createInfo(pkg, "Local");
+    }
+    alpm_pkg_free(pkg);
+
+    if (info) {
+        return info;
+    }
+
+    alpm_list_t *dblist = alpm_get_syncdbs(m_handle);
+    for(alpm_list_t *it = dblist; it; it = alpm_list_next(it)) {
+        alpm_db_t *db = reinterpret_cast<alpm_db_t*>(it->data);
+
+        alpm_pkg_t *pkg = alpm_db_get_pkg(db, name);
+        if (strcmp(alpm_pkg_get_version(pkg), version) == 0) {
+            info = createInfo(pkg, "Local");
+        }
+        alpm_pkg_free(pkg);
+        if (info) {
+            return info;
+        }
+    }
+
     return NULL;
 }
 
@@ -143,9 +173,10 @@ QString alpmInterface::FindFile(const char *name)
 
 bool alpmInterface::parseName(QString name, QString *n, QString *v)
 {
-    if (!m_handle) {
-        return false;
-    }
+    fprintf(stderr, "ALPM has sane package naming, sorry\n");
+    (void)name;
+    (void)n;
+    (void)v;
 
     return false;
 }
@@ -157,7 +188,6 @@ void alpmInterface::listPackages(QListT<packageInfo> *pki)
     puts ("Listing the rest");
     alpm_list_t *dblist = alpm_get_syncdbs(m_handle);
     for(alpm_list_t *it = dblist; it; it = alpm_list_next(it)) {
-        puts("Got db");
         alpm_db_t *db = reinterpret_cast<alpm_db_t*>(it->data);
         parseDatabase(db, pki, alpm_db_get_name(db));
     }
@@ -224,35 +254,14 @@ void alpmInterface::setAvail(LcacheObj *)
     }
 }
 
-void alpmInterface::parseDatabase(alpm_db_t *db, QListT<packageInfo> *pki, const char *name)
+void alpmInterface::parseDatabase(alpm_db_t *db, QListT<packageInfo> *pki, const char *dbName)
 {
     alpm_list_t *pkglist = alpm_db_get_pkgcache(db);
 
     for(alpm_list_t *it = pkglist; it; it = alpm_list_next(it)) {
         alpm_pkg_t *pkg = reinterpret_cast<alpm_pkg_t*>(it->data);
 
-        QDict<QString> *data = new QDict<QString>;
-        data->setAutoDelete(TRUE);
-
-        data->insert("name", new QString(alpm_pkg_get_name(pkg)));
-        data->insert("version", new QString(alpm_pkg_get_version(pkg)));
-        data->insert("packager", new QString(alpm_pkg_get_packager(pkg)));
-        data->insert("description", new QString(alpm_pkg_get_desc(pkg)));
-        QString sizeStr;
-        sizeStr.setNum(alpm_pkg_get_isize(pkg));
-        data->insert("size", new QString(sizeStr));
-
-        // TODO: better grouping
-        data->insert("group", new QString(name));
-
-        packageInfo *info = new packageInfo(data, this);
-        if (alpm_pkg_get_origin(pkg) == ALPM_PKG_FROM_LOCALDB) {
-            info->packageState = packageInfo::INSTALLED;
-        } else {
-            info->packageState = packageInfo::AVAILABLE;
-        }
-        info->smerge(typeID);
-        info->fixup();
+        packageInfo *info = createInfo(pkg, dbName);
         info->update(pki, typeID, false);
     }
 }
@@ -283,4 +292,32 @@ bool alpmInterface::loadConfig()
         m_repos.append(strdup(repo.c_str()));
     }
     return true;
+}
+
+packageInfo *alpmInterface::createInfo(alpm_pkg_t *pkg, const char *dbName)
+{
+    QDict<QString> *data = new QDict<QString>;
+    data->setAutoDelete(TRUE);
+
+    data->insert("name", new QString(alpm_pkg_get_name(pkg)));
+    data->insert("version", new QString(alpm_pkg_get_version(pkg)));
+    data->insert("packager", new QString(alpm_pkg_get_packager(pkg)));
+    data->insert("description", new QString(alpm_pkg_get_desc(pkg)));
+    QString sizeStr;
+    sizeStr.setNum(alpm_pkg_get_isize(pkg));
+    data->insert("size", new QString(sizeStr));
+
+    // TODO: better grouping
+    data->insert("group", new QString(dbName));
+
+    packageInfo *info = new packageInfo(data, this);
+    if (alpm_pkg_get_origin(pkg) == ALPM_PKG_FROM_LOCALDB) {
+        info->packageState = packageInfo::INSTALLED;
+    } else {
+        info->packageState = packageInfo::AVAILABLE;
+    }
+    info->smerge(typeID);
+    info->fixup();
+    return info;
+
 }

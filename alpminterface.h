@@ -5,6 +5,7 @@
 
 typedef struct __alpm_handle_t alpm_handle_t;
 typedef struct __alpm_db_t alpm_db_t;
+typedef struct __alpm_pkg_t alpm_pkg_t;
 
 class alpmInterface : public pkgInterface
 {
@@ -35,8 +36,9 @@ public slots:
     void setAvail(LcacheObj *) override;
 
 private:
-    void parseDatabase(alpm_db_t *db, QList<packageInfo> *pki, const char *name);
+    void parseDatabase(alpm_db_t *db, QList<packageInfo> *pki, const char *dbName);
     bool loadConfig();
+    packageInfo *createInfo(alpm_pkg_t *pkg, const char *dbName);
 
     alpm_handle_t *m_handle;
     QList<char> m_repos;

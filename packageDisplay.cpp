@@ -95,7 +95,7 @@ void packageDisplayWidget::setupWidgets()
 
 void packageDisplayWidget::arrangeWidgets()
 {
-  const int correction = 7;
+  const int correction = 0;
   int th = tabbar->height();
   int h = height() - tabbar->height() + correction;
 

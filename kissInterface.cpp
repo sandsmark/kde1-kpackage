@@ -59,7 +59,7 @@ KISS::KISS():pkgInterface()
   *new_pict = globalKIL->loadIcon("dnew.xpm");
 
   packagePattern = "*.kiss";
-  queryMsg = strdup(i18n("Querying KISS package list: "));
+  queryMsg = i18n("Querying KISS package list: ");
   typeID = "/kiss";
   procMsg = strdup(i18n("Kpackage: Waiting on KISS"));
 
@@ -71,6 +71,7 @@ KISS::KISS():pkgInterface()
 //////////////////////////////////////////////////////////////////////////////
 KISS::~KISS()
 {
+  free(procMsg);
 }
 
 //////////////////////////////////////////////////////////////////////////////

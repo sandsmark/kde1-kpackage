@@ -36,6 +36,7 @@ pkginstallOptionsWidget::~pkginstallOptionsWidget()
   for (i = 0; i < bnumber; i++) {
     delete(Boxs[i]);
   }
+  delete []Boxs;
 }
 
 // Set up the sub-widgets

@@ -59,6 +59,7 @@ packageDisplayWidget::~packageDisplayWidget()
   delete tick;
   delete cross;
   delete question;
+  delete blank;
 }
 
 void packageDisplayWidget::resizeEvent(QResizeEvent *re)

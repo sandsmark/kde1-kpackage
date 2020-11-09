@@ -28,7 +28,15 @@ packagePropertiesWidget::packagePropertiesWidget(QWidget *parent,
 
 packagePropertiesWidget::~packagePropertiesWidget()
 {
+  QDictIterator<char> it(*trl);
+  while (it.current()) {
+    free(it.current());
+    ++it;
+  }
+  trl->clear();
   delete trl;
+  delete pList;
+  delete cList;
 }
 
 void packagePropertiesWidget::iList(char *txt, const char *itxt)

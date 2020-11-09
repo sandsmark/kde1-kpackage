@@ -46,6 +46,7 @@ pkgInterface::~pkgInterface()
     delete updated_pict;
   if (new_pict)
     delete new_pict;
+  delete folder;
 }
 
 //////////////////////////////////////////////////////////////////////////////

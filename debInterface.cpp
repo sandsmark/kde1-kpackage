@@ -70,7 +70,7 @@ DEB::DEB():pkgInterface()
   *new_pict = globalKIL->loadIcon("dnew.xpm");
 
   packagePattern = "*.deb";
-  queryMsg = strdup(i18n("Querying DEB package list: "));
+  queryMsg = i18n("Querying DEB package list: ");
   typeID = "/deb";
   procMsg = strdup(i18n("Kpackage: Waiting on DPKG"));
 
@@ -101,6 +101,7 @@ DEB::DEB():pkgInterface()
 //////////////////////////////////////////////////////////////////////////////
 DEB::~DEB()
 {
+  free(procMsg);
 }
 
 //////////////////////////////////////////////////////////////////////////////

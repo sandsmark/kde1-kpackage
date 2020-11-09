@@ -74,6 +74,7 @@ pkguninstallDialog::~pkguninstallDialog()
   for (i = 0; i < bnumber; i++) {
     delete(Boxs[i]);
   }
+  delete []Boxs;
   delete uninstallButton;
   delete cancelButton;
   delete label;

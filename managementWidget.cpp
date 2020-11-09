@@ -35,9 +35,10 @@ managementWidget::managementWidget(QWidget *parent, const char *name)
 managementWidget::~managementWidget()
 {
   //  if(installedPackages)
-  //      delete installedPackages;
-  //  delete dirInstPackages;
-  //  delete dirUninstPackages;
+  delete installedPackages;
+  delete dirInfoPackages;
+  delete dirInstPackages;
+  delete dirUninstPackages;
 }
 
 void managementWidget::resizeEvent(QResizeEvent *re)

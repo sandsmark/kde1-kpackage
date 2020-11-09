@@ -76,12 +76,11 @@ fbsdInterface::fbsdInterface() {
   *new_pict = globalKIL->loadIcon("rnew.xpm");
 
   packagePattern = "*.tgz";
-  queryMsg = strdup(i18n("Querying package list: "));
+  queryMsg = i18n("Querying package list: ");
   typeID = "/tgz";
 }
 
 fbsdInterface::~fbsdInterface() {
-  
 }
 
 bool fbsdInterface::isType(char *buf, const char *fname) {

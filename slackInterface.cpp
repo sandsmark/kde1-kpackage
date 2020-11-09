@@ -66,7 +66,7 @@ SLACK::SLACK():pkgInterface()
   *new_pict = globalKIL->loadIcon("snew.xpm");
 
   packagePattern = "*.tgz *.tar.gz";
-  queryMsg = strdup(i18n("Querying SLACK package list: "));
+  queryMsg = i18n("Querying SLACK package list: ");
   typeID = "/slack";
   procMsg = strdup(i18n("Kpackage: Waiting on SLACK"));
 

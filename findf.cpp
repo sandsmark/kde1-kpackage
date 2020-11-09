@@ -112,7 +112,7 @@ void FindF::doFind(const char *str)
 
 	int t1 = tmp.find('\t');
 	QString s1 = tmp.left(t1);
-	QString s2 = tmp.right(tmp.length()-t1);
+    QString s2 = tmp.right(tmp.length()-t1-1);
 
 	new QListViewItem(tab, t, s1, s2);
 	p++;

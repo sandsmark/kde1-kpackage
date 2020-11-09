@@ -360,7 +360,7 @@ QListViewItem *packageInfo::place(QListView *tree, bool insertI)
 	parent->setOpen(TRUE);
 	search = NULL;
       }
-      delete(gtrav);
+      free(gtrav);
       cnt++;
     }
 

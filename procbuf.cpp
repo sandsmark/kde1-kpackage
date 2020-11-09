@@ -32,10 +32,19 @@ procbuf::procbuf()
 
 procbuf::~procbuf()
 {
+  if (proc) {
+    delete proc;
+    proc = NULL;
+  }
 }
 
 void procbuf::setup(const char *cmd)
 {
+  if (proc) {
+    delete proc;
+    proc = NULL;
+  }
+
   buf.truncate(0);
   proc = new KProcess();
   connect(proc, SIGNAL( receivedStdout(KProcess *, char *, int)), 
@@ -61,23 +70,16 @@ void procbuf::slotReadInfo(KProcess *, char *buffer, int buflen)
 
 void procbuf::slotExited(KProcess *)
 {
-  delete proc;
-  proc = NULL;
   if (m)
     m->terminate();
 }
 
 int procbuf::start (const char *msg, bool errorDlg )
 {
-
   if (!proc->start(msg ? KProcess::NotifyOnExit : KProcess::Block,  KProcess::AllOutput)) {
     KpMsgE(i18n("Kprocess Failure"),"",TRUE);
     return 0;
   };
-  if (!proc) {
-      puts("Quit too early");
-      return 0;
-  }
 
   proc->closeStdin();
   if (msg) {

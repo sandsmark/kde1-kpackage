@@ -15,8 +15,8 @@
 extern Params *params;
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-dpanel::dpanel(updateLoc *upd,  char *Pfilter, QWidget *parent,
-	       bool buse, const char *name ) 
+dpanel::dpanel(updateLoc *upd,  const char *Pfilter, QWidget *parent,
+           bool buse, const char *name )
   : QWidget( parent, name )   
 {
   filter = Pfilter;
@@ -173,8 +173,8 @@ void dpanel::dirOpen()
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 updateLoc::updateLoc(QWidget *p, int panelNumber, int numberLines,
-		     pkgInterface *inter, const char *msg,
-		     char *iname, char *filter, const char *lmsg, const char *bmsg)
+             pkgInterface *inter, const char *msg,
+             const char *iname, const char *filter, const char *lmsg, const char *bmsg)
     : QDialog(p,"updateLoc",FALSE)
 {
   interName = iname;
@@ -348,8 +348,8 @@ Locations::Locations( const char *msg)
 }
 
 void Locations::dLocations(int numberDirs,  int numberLines,
-		     pkgInterface *inter, const char *label,
-		     char *iname, char *filter, const char *dirMsg)
+             pkgInterface *inter, const char *label,
+             const char *iname, const char *filter, const char *dirMsg)
 {
   QString nm;
 
@@ -359,14 +359,14 @@ void Locations::dLocations(int numberDirs,  int numberLines,
     QString mp = label;
     nm.setNum(i+1);
     mp += nm;
-    tab->addTab(pn[i],strdup(mp));
+    tab->addTab(pn[i],mp);
   }
   numPanels += numberDirs;
 }
 
 void Locations::pLocations(int numberDirs,  int numberLines,
-		     pkgInterface *inter, const char *label, char *iname,
-		     char *filter, 
+             pkgInterface *inter, const char *label, const char *iname,
+             const char *filter,
 		     const char *packMsg, const char *baseMsg)
 {
   QString nm;

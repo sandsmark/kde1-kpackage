@@ -43,7 +43,7 @@ class dpanel : public QWidget
   Q_OBJECT
 
 public:
-  dpanel(updateLoc *upd, char *Pfilter, QWidget *parent,
+  dpanel(updateLoc *upd, const char *Pfilter, QWidget *parent,
 	 bool buse = TRUE, const char *name  = 0 );
   ~dpanel();
 
@@ -62,7 +62,7 @@ private:
   QPushButton *pbut;
 
   dpanel *base;
-  char *filter;
+  const char *filter;
 
  public slots:
   void fileOpen();
@@ -79,7 +79,7 @@ class updateLoc : public QDialog
 public:
 
   updateLoc (QWidget *p, int panelNumber, int numberLines, pkgInterface *inter,
-	     const char *msg, char *iname, char *filter,
+         const char *msg, const char *iname, const char *filter,
 	     const char *lmsg, const char *bmsg = 0);
   ~updateLoc(); 
 
@@ -96,7 +96,7 @@ public:
 
 private:
 
-  char *interName;
+  const char *interName;
   QString packL, packU, availB;
   int panNumber;
 
@@ -132,12 +132,12 @@ class Locations : public QDialog
 public:
 Locations( const char *msg);
 void dLocations(int numberDirs,  int numberLines,
-		     pkgInterface *inter, const char *label,
-		     char *iname, char *filter, const char *dirMsg);
+             pkgInterface *inter, const char *label,
+             const char *iname, const char *filter, const char *dirMsg);
 void pLocations(int numberDirs,  int numberLines,
-		     pkgInterface *inter, const  char *label,
-		     char *iname, char *filter,
-		     const char *packMsg, const char *baseMsg = 0);
+             pkgInterface *inter, const  char *label,
+             const char *iname, const char *filter,
+             const char *packMsg, const char *baseMsg = 0);
 
   // bmsg indicates the panel has a base entry
 ~Locations();

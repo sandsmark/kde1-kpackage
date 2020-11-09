@@ -39,7 +39,7 @@ packagePropertiesWidget::~packagePropertiesWidget()
   delete cList;
 }
 
-void packagePropertiesWidget::iList(char *txt, const char *itxt)
+void packagePropertiesWidget::iList(const char *txt, const char *itxt)
 {
   trl->insert(txt,strdup(itxt));
   pList->append(txt);

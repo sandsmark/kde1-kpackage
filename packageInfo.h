@@ -50,7 +50,7 @@ public:
   ~packageInfo();
   // Distructor
 
-  QString *getProperty(char *property);
+  QString *getProperty(const char *property);
   // returns the property `property' from the dictionary
 
   void fixup();
@@ -82,7 +82,7 @@ public:
   int newer(packageInfo *p);
   // if package p is newer
 
-  bool update(QList<packageInfo> *pki, char *exp, bool installed,
+  bool update(QList<packageInfo> *pki, const char *exp, bool installed,
 	      bool infoPackage = FALSE);
   // insert packgeInfo either installed or not installed
 
@@ -96,7 +96,7 @@ public:
   pkgInterface *interface;
   // interface points to the class of the package (deb, rpm etc)
 
-  bool smerge( char *exp);
+  bool smerge(const char *exp);
   // merge with already existing NOLIST package info
 
   enum {UNSET, AVAILABLE,  INSTALLED, BAD_INSTALL, UPDATED, NEW, NOLIST};

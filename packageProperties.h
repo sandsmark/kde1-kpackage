@@ -57,7 +57,7 @@ private:
   packageInfo *package;
  
   void initTranslate();
-  void iList(char *txt, const char *itxt);
+  void iList(const char *txt, const char *itxt);
 
   QDict<char> *trl;
   // allow for translation of labels

@@ -132,13 +132,13 @@ public:
   bool dirOK;
   // variables related to reading packages from directories
 
-  char *packagePattern;
+  const char *packagePattern;
   QString queryMsg;
-  char  *typeID;
+  const char  *typeID;
   // Parameters for reading packages from directories
 
   procbuf reader;
-  const char *procMsg;
+  char *procMsg;
   // for running processes
 
 public slots:

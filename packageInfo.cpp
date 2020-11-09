@@ -60,7 +60,7 @@ packageInfo::~packageInfo()
 }
 
 // Return a property
-QString *packageInfo::getProperty(char *property)
+QString *packageInfo::getProperty(const char *property)
 {
   return info->find(property);
 }
@@ -438,7 +438,7 @@ QListViewItem *packageInfo::getItem()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-bool packageInfo::smerge( char *exp) {
+bool packageInfo::smerge( const char *exp) {
 
   QDict<packageInfo> *dirInfoPackages = kpkg->kp->management->dirInfoPackages;
   QString pname = *getProperty("name") + exp;
@@ -461,7 +461,7 @@ bool packageInfo::smerge( char *exp) {
 
 
 //////////////////////////////////////////////////////////////////////////////
-bool packageInfo::update(QList<packageInfo> *pki, char *exp,
+bool packageInfo::update(QList<packageInfo> *pki, const char *exp,
 			 bool installed, bool infoPackage)
 {
   QDict<packageInfo> *dirInstPackages = kpkg->kp->management->dirInstPackages;

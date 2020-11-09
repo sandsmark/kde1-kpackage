@@ -38,16 +38,21 @@ alpmInterface::alpmInterface()
     new_pict = new QPixmap();
     *new_pict = globalKIL->loadIcon("rnew.xpm");
 
-    m_repos.setAutoDelete(TRUE);
     initialize();
 }
 
 alpmInterface::~alpmInterface()
 {
+    std::unordered_set<alpmPackageInfo*>::iterator it = m_instantiated.begin();
+    while (it != m_instantiated.end()) {
+        (*it)->interface = NULL;
+        delete *it;
+        it++;
+    }
+
     if (m_handle) {
         alpm_release(m_handle);
     }
-
     m_handle = NULL;
 }
 
@@ -101,30 +106,16 @@ packageInfo *alpmInterface::getPackageInfo(char mode, const char *name, const ch
         fprintf(stderr, "Failed loading local database: %s\n", alpm_strerror(alpm_errno(m_handle)));
         return NULL; // todo; could probably check the others, but if you don't have local ur fukd
     }
-    packageInfo *info = NULL;
-    alpm_pkg_t *pkg = alpm_db_get_pkg(db, name);
-    if (strcmp(alpm_pkg_get_version(pkg), version) == 0) {
-        info = createInfo(pkg, "Local");
+    alpm_pkg_t *pkg = findPackage(name, version);
+    if (!pkg) {
+        puts("Failed to find package");
+        return NULL;
     }
-    alpm_pkg_free(pkg);
-
+    packageInfo *info = createInfo(pkg);
     if (info) {
         return info;
     }
-
-    alpm_list_t *dblist = alpm_get_syncdbs(m_handle);
-    for(alpm_list_t *it = dblist; it; it = alpm_list_next(it)) {
-        alpm_db_t *db = reinterpret_cast<alpm_db_t*>(it->data);
-
-        alpm_pkg_t *pkg = alpm_db_get_pkg(db, name);
-        if (strcmp(alpm_pkg_get_version(pkg), version) == 0) {
-            info = createInfo(pkg, "Local");
-        }
-        alpm_pkg_free(pkg);
-        if (info) {
-            return info;
-        }
-    }
+    alpm_pkg_free(pkg);
 
     return NULL;
 }
@@ -134,7 +125,23 @@ QListT<char> *alpmInterface::getFileList(packageInfo *p)
     if (!m_handle) {
         return NULL;
     }
-    return NULL;
+    alpmPackageInfo *pkg = static_cast<alpmPackageInfo*>(p);
+    QList<char> *filelist = new QList<char>;
+    filelist->setAutoDelete(TRUE);
+    alpm_filelist_t *files = alpm_pkg_get_files(pkg->alpm_pkg);
+
+    for (size_t i=0; i<files->count; i++) {
+        if (!files->files[i].name) {
+            continue;
+        }
+        char *name = (char*)operator new(strlen(files->files[i].name) + 2);
+        name[0] = '\0';
+        name = strcat(name, "/");
+        name = strcat(name, files->files[i].name);
+        filelist->append(name);
+    }
+
+    return filelist;
 }
 
 QListT<char> *alpmInterface::depends(const char *name, int src)
@@ -189,7 +196,7 @@ void alpmInterface::listPackages(QListT<packageInfo> *pki)
     alpm_list_t *dblist = alpm_get_syncdbs(m_handle);
     for(alpm_list_t *it = dblist; it; it = alpm_list_next(it)) {
         alpm_db_t *db = reinterpret_cast<alpm_db_t*>(it->data);
-        parseDatabase(db, pki, alpm_db_get_name(db));
+        parseDatabase(db, pki);
     }
 }
 
@@ -204,7 +211,7 @@ void alpmInterface::listInstalledPackages(QListT<packageInfo> *pki)
         fprintf(stderr, "Failed loading local database: %s\n", alpm_strerror(alpm_errno(m_handle)));
         return;
     }
-    parseDatabase(db, pki, "Local");
+    parseDatabase(db, pki);
 }
 
 void alpmInterface::smerge(packageInfo *p)
@@ -229,12 +236,10 @@ bool alpmInterface::initialize()
         fprintf(stderr, "Error initializing: %s (root: %s, database: %s)\n", alpm_strerror(err), ROOTDIR, DBPATH);
         return false;
     }
-    QListIterator<char> it(m_repos);
 
-    char *name = NULL;
-    for (; (name = it.current()); ++it) {
+    for (size_t i=0; i<m_repos.size(); i++) {
         // TODO: read siglevel from config
-        alpm_register_syncdb(m_handle, name, ALPM_SIG_USE_DEFAULT);
+        alpm_register_syncdb(m_handle, m_repos[i].c_str(), ALPM_SIG_USE_DEFAULT);
     }
     puts("ALPM initialized");
     return true;
@@ -254,14 +259,14 @@ void alpmInterface::setAvail(LcacheObj *)
     }
 }
 
-void alpmInterface::parseDatabase(alpm_db_t *db, QListT<packageInfo> *pki, const char *dbName)
+void alpmInterface::parseDatabase(alpm_db_t *db, QListT<packageInfo> *pki)
 {
     alpm_list_t *pkglist = alpm_db_get_pkgcache(db);
 
     for(alpm_list_t *it = pkglist; it; it = alpm_list_next(it)) {
         alpm_pkg_t *pkg = reinterpret_cast<alpm_pkg_t*>(it->data);
 
-        packageInfo *info = createInfo(pkg, dbName);
+        packageInfo *info = createInfo(pkg);
         info->update(pki, typeID, false);
     }
 }
@@ -289,12 +294,12 @@ bool alpmInterface::loadConfig()
         if (repo == "options") {
             continue;
         }
-        m_repos.append(strdup(repo.c_str()));
+        m_repos.push_back(repo);
     }
     return true;
 }
 
-packageInfo *alpmInterface::createInfo(alpm_pkg_t *pkg, const char *dbName)
+packageInfo *alpmInterface::createInfo(alpm_pkg_t *pkg)
 {
     QDict<QString> *data = new QDict<QString>;
     data->setAutoDelete(TRUE);
@@ -308,9 +313,17 @@ packageInfo *alpmInterface::createInfo(alpm_pkg_t *pkg, const char *dbName)
     data->insert("size", new QString(sizeStr));
 
     // TODO: better grouping
+    const char *dbName = "Local";
+    alpm_db_t *db = alpm_pkg_get_db(pkg);
+    if (db) {
+        dbName = alpm_db_get_name(db);
+    } else {
+        puts("FAiled to get db");
+    }
     data->insert("group", new QString(dbName));
 
-    packageInfo *info = new packageInfo(data, this);
+    alpmPackageInfo *info = new alpmPackageInfo(data, this, pkg);
+    m_instantiated.insert(info);
     if (alpm_pkg_get_origin(pkg) == ALPM_PKG_FROM_LOCALDB) {
         info->packageState = packageInfo::INSTALLED;
     } else {
@@ -320,4 +333,42 @@ packageInfo *alpmInterface::createInfo(alpm_pkg_t *pkg, const char *dbName)
     info->fixup();
     return info;
 
+}
+
+alpm_pkg_t *alpmInterface::findPackage(const char *name, const char *version)
+{
+    if (!m_handle) {
+        return NULL;
+    }
+    alpm_db_t *db = alpm_get_localdb(m_handle);
+    if (!db) {
+        fprintf(stderr, "Failed loading local database: %s\n", alpm_strerror(alpm_errno(m_handle)));
+        return NULL; // todo; could probably check the others, but if you don't have local ur fukd
+    }
+    alpm_pkg_t *pkg = alpm_db_get_pkg(db, name);
+    if (!version || strcmp(alpm_pkg_get_version(pkg), version) == 0) {
+        return pkg;
+    }
+    alpm_pkg_free(pkg);
+
+    alpm_list_t *dblist = alpm_get_syncdbs(m_handle);
+    for(alpm_list_t *it = dblist; it; it = alpm_list_next(it)) {
+        alpm_db_t *db = reinterpret_cast<alpm_db_t*>(it->data);
+
+        alpm_pkg_t *pkg = alpm_db_get_pkg(db, name);
+        if (!version || strcmp(alpm_pkg_get_version(pkg), version) == 0) {
+            return pkg;
+        }
+        alpm_pkg_free(pkg);
+    }
+
+    return NULL;
+}
+
+alpmPackageInfo::~alpmPackageInfo()
+{
+    if (interface) {
+        static_cast<alpmInterface*>(interface)->removeAlpmPackage(this);
+    }
+    alpm_pkg_free(alpm_pkg);
 }

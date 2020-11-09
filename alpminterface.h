@@ -2,10 +2,26 @@
 #define ALPMINTERFACE_H
 
 #include "pkgInterface.h"
+#include <vector>
+#include <string>
+#include <unordered_set>
 
 typedef struct __alpm_handle_t alpm_handle_t;
 typedef struct __alpm_db_t alpm_db_t;
 typedef struct __alpm_pkg_t alpm_pkg_t;
+
+struct alpmPackageInfo : public packageInfo
+{
+    alpmPackageInfo(QDict<QString> *_info, pkgInterface *type, alpm_pkg_t *me) :
+        packageInfo(_info, type), alpm_pkg(me) {}
+    alpmPackageInfo(QDict<QString> *_info, QString _filename, alpm_pkg_t *me) :
+        packageInfo(_info, _filename),
+        alpm_pkg(me) { }
+
+    ~alpmPackageInfo();
+
+    alpm_pkg_t *alpm_pkg;
+};
 
 class alpmInterface : public pkgInterface
 {
@@ -31,17 +47,25 @@ public:
 
     bool initialize();
 
+    void removeAlpmPackage(alpmPackageInfo *pkg) {
+        m_instantiated.erase(pkg);
+    }
+
 public slots:
     void setLocation() override;
     void setAvail(LcacheObj *) override;
 
 private:
-    void parseDatabase(alpm_db_t *db, QList<packageInfo> *pki, const char *dbName);
+    void parseDatabase(alpm_db_t *db, QList<packageInfo> *pki);
     bool loadConfig();
-    packageInfo *createInfo(alpm_pkg_t *pkg, const char *dbName);
+    packageInfo *createInfo(alpm_pkg_t *pkg);
+    alpm_pkg_t *findPackage(const char *name, const char *version);
 
     alpm_handle_t *m_handle;
-    QList<char> m_repos;
+    std::vector<std::string> m_repos;
+
+    // I don't understand QListT, so just do it manually
+    std::unordered_set<alpmPackageInfo*> m_instantiated;
 };
 
 #endif // ALPMINTERFACE_H

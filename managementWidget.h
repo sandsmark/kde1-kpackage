@@ -88,6 +88,7 @@ public:
 
 protected:
   void resizeEvent(QResizeEvent *re);
+    void closeEvent( QCloseEvent * );
   // This is called when the widget is resized
 
 private:

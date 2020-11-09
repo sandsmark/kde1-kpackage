@@ -47,7 +47,7 @@ public:
   // This is used in the case that the package info was obtained from
   // an uninstalled package.
 
-  ~packageInfo();
+  virtual ~packageInfo();
   // Distructor
 
   QString *getProperty(const char *property);

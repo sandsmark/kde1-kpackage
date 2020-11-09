@@ -84,7 +84,7 @@ void packageInfo::fixup()
 
   if (!info->find("name")) {
     QString *q = new QString("");;
-    q->setNum((int)this);
+    q->setNum((intptr_t)this);
     info->insert("name", q);
   }
 }

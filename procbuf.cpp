@@ -27,6 +27,7 @@ void Modal::terminate()
 procbuf::procbuf()
 {
   m = NULL;
+  proc = NULL;
 }
 
 procbuf::~procbuf()
@@ -61,6 +62,7 @@ void procbuf::slotReadInfo(KProcess *, char *buffer, int buflen)
 void procbuf::slotExited(KProcess *)
 {
   delete proc;
+  proc = NULL;
   if (m)
     m->terminate();
 }
@@ -72,6 +74,10 @@ int procbuf::start (const char *msg, bool errorDlg )
     KpMsgE(i18n("Kprocess Failure"),"",TRUE);
     return 0;
   };
+  if (!proc) {
+      puts("Quit too early");
+      return 0;
+  }
 
   proc->closeStdin();
   if (msg) {

@@ -48,6 +48,8 @@ extern Params *params;
 KPKG::KPKG(KConfig *_config, const char *name) 
   : KTopLevelWidget(name)
 {
+  hide_toolbar=FALSE;
+
   kp = new KPACKAGE(_config,this);
   kp->show();
   setView(kp);

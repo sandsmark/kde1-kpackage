@@ -448,8 +448,8 @@ bool packageInfo::smerge( const char *exp) {
     QDictIterator<QString> it( *(pi->info) );
 
     while ( it.current() ) {
-      if (!(it.currentKey() == "size" && info->find("size")) ||
-	  !(it.currentKey() == "file-size"  && info->find("file-size"))) {
+      if (!(it.currentKey() == QString("size") && info->find("size")) ||
+      !(it.currentKey() == QString("file-size")  && info->find("file-size"))) {
 	info->insert(it.currentKey(), new QString(it.current()->data()));
       }
       ++it;

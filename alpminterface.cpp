@@ -4,19 +4,341 @@
 #include "kpackage.h"
 #include <fstream>
 
-
 static param pinstall[] =  {
-  {"Test (do not install)",FALSE,FALSE},
+  {"Only install needed",TRUE,FALSE},
+  {"Mark as installed as a dependency",FALSE,FALSE},
+  {"Ignore dependencies",FALSE,FALSE},
+  {"Ignore scripts",FALSE,FALSE},
+  {"Print only, don't do anything",FALSE,FALSE},
+  {"Only modify database",FALSE,FALSE},
   {0,FALSE,FALSE}
 };
 
 static param puninstall[] =  {
-  {"Test (do not uninstall)",FALSE,FALSE},
+  {"Remove packages depending on package",TRUE,FALSE},
+  {"Remove dependencies of package",TRUE,FALSE},
+  {"Remove unneeded packages",TRUE,FALSE},
+  {"Ignore dependencies",FALSE,FALSE},
+  {"Print only, don't do anything",FALSE,FALSE},
+  {"Only modify database",FALSE,FALSE},
   {0,FALSE,FALSE}
 };
 
+static alpmInterface *s_instance;
+
+static void eventCallback(alpm_event_t *event)
+{
+    switch(event->type) {
+    /** Dependencies will be computed for a package. */
+    case ALPM_EVENT_CHECKDEPS_START:
+        kpkg->kp->setStatus(i18n("Checking dependencies..."));
+        break;
+    /** Dependencies were computed for a package. */
+    case ALPM_EVENT_CHECKDEPS_DONE:
+        kpkg->kp->setStatus(i18n("Completed checking dependencies."));
+        break;
+    /** File conflicts will be computed for a package. */
+    case ALPM_EVENT_FILECONFLICTS_START:
+        kpkg->kp->setStatus(i18n("Checking for file conflicts..."));
+        break;
+    /** File conflicts were computed for a package. */
+    case ALPM_EVENT_FILECONFLICTS_DONE:
+        kpkg->kp->setStatus(i18n("Completed checking file conflicts."));
+        break;
+    /** Dependencies will be resolved for target package. */
+    case ALPM_EVENT_RESOLVEDEPS_START:
+        kpkg->kp->setStatus(i18n("Resolving dependencies..."));
+        break;
+    /** Dependencies were resolved for target package. */
+    case ALPM_EVENT_RESOLVEDEPS_DONE:
+        kpkg->kp->setStatus(i18n("Completed resolving dependencies."));
+        break;
+    /** Inter-conflicts will be checked for target package. */
+    case ALPM_EVENT_INTERCONFLICTS_START:
+        kpkg->kp->setStatus(i18n("Checking for conflicts..."));
+        break;
+    /** Inter-conflicts were checked for target package. */
+    case ALPM_EVENT_INTERCONFLICTS_DONE:
+        kpkg->kp->setStatus(i18n("Completed checking for conflicts."));
+        break;
+    /** Processing the package transaction is starting. */
+    case ALPM_EVENT_TRANSACTION_START:
+        kpkg->kp->setStatus(i18n("Starting package transaction..."));
+        break;
+    /** Processing the package transaction is finished. */
+    case ALPM_EVENT_TRANSACTION_DONE:
+        kpkg->kp->setStatus(i18n("Package transaction completed."));
+        break;
+    /** Package will be installed/upgraded/downgraded/re-installed/removed; See
+     * alpm_event_package_operation_t for arguments. */
+    case ALPM_EVENT_PACKAGE_OPERATION_START: {
+        switch(event->package_operation.operation) {
+        /** Package (to be) installed. (No oldpkg) */
+        case ALPM_PACKAGE_INSTALL:
+            kpkg->kp->setStatus(i18n("Starting installation..."));
+            break;
+        /** Package (to be) upgraded */
+        case ALPM_PACKAGE_UPGRADE:
+            kpkg->kp->setStatus(i18n("Starting upgrade..."));
+            break;
+        /** Package (to be) re-installed. */
+        case ALPM_PACKAGE_REINSTALL:
+            kpkg->kp->setStatus(i18n("Starting reinstallation..."));
+            break;
+        /** Package (to be) downgraded. */
+        case ALPM_PACKAGE_DOWNGRADE:
+            kpkg->kp->setStatus(i18n("Starting downgrade..."));
+            break;
+        /** Package (to be) removed. (No newpkg) */
+        case ALPM_PACKAGE_REMOVE:
+            kpkg->kp->setStatus(i18n("Starting removal..."));
+            break;
+        default:
+            puts("unhandled");
+            break;
+        }
+
+        break;
+    }
+    /** Package was installed/upgraded/downgraded/re-installed/removed; See
+     * alpm_event_package_operation_t for arguments. */
+    case ALPM_EVENT_PACKAGE_OPERATION_DONE: {
+        switch(event->package_operation.operation) {
+        /** Package (to be) installed. (No oldpkg) */
+        case ALPM_PACKAGE_INSTALL:
+            kpkg->kp->setStatus(i18n("Completed installation."));
+            break;
+        /** Package (to be) upgraded */
+        case ALPM_PACKAGE_UPGRADE:
+            kpkg->kp->setStatus(i18n("Completed upgrade."));
+            break;
+        /** Package (to be) re-installed. */
+        case ALPM_PACKAGE_REINSTALL:
+            kpkg->kp->setStatus(i18n("Completed reinstallation."));
+            break;
+        /** Package (to be) downgraded. */
+        case ALPM_PACKAGE_DOWNGRADE:
+            kpkg->kp->setStatus(i18n("Completed downgrade."));
+            break;
+        /** Package (to be) removed. (No newpkg) */
+        case ALPM_PACKAGE_REMOVE:
+            kpkg->kp->setStatus(i18n("Completed removal."));
+            break;
+        default:
+            puts("unhandled");
+            break;
+        }
+        break;
+    }
+    /** Target package's integrity will be checked. */
+    case ALPM_EVENT_INTEGRITY_START:
+        kpkg->kp->setStatus(i18n("Starting integrity check..."));
+        break;
+    /** Target package's integrity was checked. */
+    case ALPM_EVENT_INTEGRITY_DONE:
+        kpkg->kp->setStatus(i18n("Completed integrity check."));
+        break;
+    /** Target package will be loaded. */
+    case ALPM_EVENT_LOAD_START:
+        kpkg->kp->setStatus(i18n("Loading package..."));
+        break;
+    /** Target package is finished loading. */
+    case ALPM_EVENT_LOAD_DONE:
+        kpkg->kp->setStatus(i18n("Completed loading package."));
+        break;
+    /** Scriptlet has printed information; See alpm_event_scriptlet_info_t for
+     * arguments. */
+    case ALPM_EVENT_SCRIPTLET_INFO:
+        kpkg->kp->setStatus(event->scriptlet_info.line); // TODO: should print this nicely somewhere
+        break;
+    /** Files will be downloaded from a repository. */
+    case ALPM_EVENT_RETRIEVE_START:
+        kpkg->kp->setStatus(i18n("Retrieving files..."));
+        break;
+    /** Files were downloaded from a repository. */
+    case ALPM_EVENT_RETRIEVE_DONE:
+        kpkg->kp->setStatus(i18n("Completed file retrieval."));
+        break;
+    /** Not all files were successfully downloaded from a repository. */
+    case ALPM_EVENT_RETRIEVE_FAILED:
+        kpkg->kp->setStatus(i18n("Failed to retrieve files.")); // todo: messagebox?
+        break;
+    /** A file will be downloaded from a repository; See alpm_event_pkgdownload_t
+     * for arguments */
+    case ALPM_EVENT_PKGDOWNLOAD_START:
+        kpkg->kp->setStatus(i18n("Downloading packages..."));
+        break;
+    /** A file was downloaded from a repository; See alpm_event_pkgdownload_t
+     * for arguments */
+    case ALPM_EVENT_PKGDOWNLOAD_DONE:
+        kpkg->kp->setStatus(i18n("Completed downloading packages."));
+        break;
+    /** A file failed to be downloaded from a repository; See
+     * alpm_event_pkgdownload_t for arguments */
+    case ALPM_EVENT_PKGDOWNLOAD_FAILED:
+        kpkg->kp->setStatus(i18n("Failed to download packages.")); // todo: messagebox?
+        break;
+    /** Disk space usage will be computed for a package. */
+    case ALPM_EVENT_DISKSPACE_START:
+        kpkg->kp->setStatus(i18n("Checking disk space..."));
+        break;
+    /** Disk space usage was computed for a package. */
+    case ALPM_EVENT_DISKSPACE_DONE:
+        kpkg->kp->setStatus(i18n("Disk space check done."));
+        break;
+    /** An optdepend for another package is being removed; See
+     * alpm_event_optdep_removal_t for arguments. */
+    case ALPM_EVENT_OPTDEP_REMOVAL:
+        kpkg->kp->setStatus(i18n("Removing optional dependency for another package"));
+        break;
+    /** A configured repository database is missing; See
+     * alpm_event_database_missing_t for arguments. */
+    case ALPM_EVENT_DATABASE_MISSING:
+        KpMsgE("Package database is missing!", "", FALSE);
+        break;
+    /** Checking keys used to create signatures are in keyring. */
+    case ALPM_EVENT_KEYRING_START:
+        kpkg->kp->setStatus(i18n("Checking keyring..."));
+        break;
+    /** Keyring checking is finished. */
+    case ALPM_EVENT_KEYRING_DONE:
+        kpkg->kp->setStatus(i18n("Completed checking keyring."));
+        break;
+    /** Downloading missing keys into keyring. */
+    case ALPM_EVENT_KEY_DOWNLOAD_START:
+        kpkg->kp->setStatus(i18n("Downloading missing keys to keyring..."));
+        break;
+    /** Key downloading is finished. */
+    case ALPM_EVENT_KEY_DOWNLOAD_DONE:
+        kpkg->kp->setStatus(i18n("Completed download of keys."));
+        break;
+    /** A .pacnew file was created; See alpm_event_pacnew_created_t for arguments. */
+    case ALPM_EVENT_PACNEW_CREATED:
+        kpkg->kp->setStatus(i18n("Created a pacnew file."));
+        break;
+    /** A .pacsave file was created; See alpm_event_pacsave_created_t for
+     * arguments */
+    case ALPM_EVENT_PACSAVE_CREATED:
+        kpkg->kp->setStatus(i18n("Created a pacsav file."));
+        break;
+    /** Processing hooks will be started. */
+    case ALPM_EVENT_HOOK_START:
+        kpkg->kp->setStatus(i18n("Starting processing hooks..."));
+        break;
+    /** Processing hooks is finished. */
+    case ALPM_EVENT_HOOK_DONE:
+        kpkg->kp->setStatus(i18n("Processing hooks complete."));
+        break;
+    /** A hook is starting */
+    case ALPM_EVENT_HOOK_RUN_START:
+        kpkg->kp->setStatus(i18n("Starting hook..."));
+        break;
+    /** A hook has finished running */
+    case ALPM_EVENT_HOOK_RUN_DONE:
+        kpkg->kp->setStatus(i18n("Hook complete."));
+        break;
+    default:
+        puts("unexpected and unhandled");
+        break;
+    }
+}
+static void questionCallback(alpm_question_t *question)
+{
+    // TODO
+    switch(question->type) {
+    case ALPM_QUESTION_INSTALL_IGNOREPKG:
+        break;
+    case ALPM_QUESTION_REPLACE_PKG:
+        break;
+    case ALPM_QUESTION_CONFLICT_PKG:
+        break;
+    case ALPM_QUESTION_CORRUPTED_PKG:
+        break;
+    case ALPM_QUESTION_REMOVE_PKGS:
+        break;
+    case ALPM_QUESTION_SELECT_PROVIDER:
+        break;
+    case ALPM_QUESTION_IMPORT_KEY:
+        break;
+    default:
+        puts("Nope");
+        break;
+    }
+
+}
+static void progressCallback(alpm_progress_t type, const char *packageName, int percent, size_t total, size_t current)
+{
+    QString typeString;
+    switch(type) {
+    case ALPM_PROGRESS_ADD_START:
+        typeString = "Installing ";
+        break;
+    case ALPM_PROGRESS_UPGRADE_START:
+        typeString = "Upgrading ";
+        break;
+    case ALPM_PROGRESS_DOWNGRADE_START:
+        typeString = "Downgrading ";
+        break;
+    case ALPM_PROGRESS_REINSTALL_START:
+        typeString = "Reinstalling ";
+        break;
+    case ALPM_PROGRESS_REMOVE_START:
+        typeString = "Removing ";
+        break;
+    case ALPM_PROGRESS_CONFLICTS_START:
+        typeString = "Checking for file conflicts ";
+        break;
+    case ALPM_PROGRESS_DISKSPACE_START:
+        typeString = "Checking for free disk space ";
+        break;
+    case ALPM_PROGRESS_INTEGRITY_START:
+        typeString = "Checking file integrity ";
+        break;
+    case ALPM_PROGRESS_LOAD_START:
+        typeString = "Loading packages ";
+        break;
+    case ALPM_PROGRESS_KEYRING_START:
+        typeString = "Checking keyring ";
+        break;
+    default:
+        break;
+    }
+
+    // I don't trust the asprintf stuff of QString, it is broken internally
+    QString percentString;
+    percentString.setNum(percent);
+    QString totalString;
+    totalString.setNum(total);
+    QString currentString;
+    currentString.setNum(current);
+    kpkg->kp->setStatus(typeString + QString(packageName) + " " + percentString + "% (" + currentString + "/" + totalString);
+
+    if (percent >= 0 && percent <= 100) {
+        kpkg->kp->setPercent(percent);
+    }
+}
+static void downloadProgressCallback(const char *filename, off_t xfered, off_t total)
+{
+    off_t percent = 100 * xfered / total;
+    kpkg->kp->setPercent(percent);
+}
+
+static void totalDownloadSizeCallback(off_t total)
+{
+    QString totalString;
+    totalString.setNum(total);
+    kpkg->kp->setStatus("Downloading " + totalString + " bytes...");
+}
+
+// TODO: fetchNetFile() doesn't let us force a download path
+//static int downloadFileCallback(const char *url, const char *localpath, int force);
+
 alpmInterface::alpmInterface()
 {
+    if (s_instance) {
+        fprintf(stderr, "It should only have one instance");
+    }
+    s_instance = this;
     head = "Pacman";
 
     m_handle = NULL;
@@ -155,6 +477,9 @@ QListT<char> *alpmInterface::depends(const char *name, int src)
     if (!m_handle) {
         return NULL;
     }
+    // isn't used by the ui
+    (void)name;
+    (void)src;
     return NULL;
 }
 
@@ -163,6 +488,10 @@ int alpmInterface::doUninstall(int installFlags, QString packs)
     if (!m_handle) {
         return 0;
     }
+    if (geteuid() != 0) {
+        KpMsgE("KPackage needs to run as root to do useful stuff. Trust me, it's safe.", "", FALSE);
+        return -1;
+    }
 
     return 0;
 }
@@ -170,7 +499,11 @@ int alpmInterface::doUninstall(int installFlags, QString packs)
 int alpmInterface::doInstall(int installFlags, QString packs)
 {
     if (!m_handle) {
-        return 0;
+        return -1;
+    }
+    if (geteuid() != 0) {
+        KpMsgE("KPackage needs to run as root to do useful stuff. Trust me, it's safe.", "", FALSE);
+        return -1;
     }
 
     return 0;
@@ -181,7 +514,35 @@ QString alpmInterface::FindFile(const char *name)
     if (!m_handle) {
         return "";
     }
-    return 0;
+    alpm_db_t *db = alpm_get_localdb(m_handle);
+    if (!db) {
+        fprintf(stderr, "Failed loading local database: %s\n", alpm_strerror(alpm_errno(m_handle)));
+        return "";
+    }
+    QString ret;
+
+    alpm_list_t *pkglist = alpm_db_get_pkgcache(db);
+    bool stripSlash = strchr(name, '/') == NULL;
+
+    for(alpm_list_t *it = pkglist; it; it = alpm_list_next(it)) {
+        alpm_pkg_t *pkg = reinterpret_cast<alpm_pkg_t*>(it->data);
+
+        alpm_filelist_t *files = alpm_pkg_get_files(pkg);
+
+        for (size_t i=0; i<files->count; i++) {
+            const char *filename = NULL;
+            if (stripSlash) {
+                filename = rindex(files->files[i].name, '/');
+            }
+            if (!filename) {
+                filename = files->files[i].name;
+            }
+            if (strstr(filename, name)) {
+                ret += QString(alpm_pkg_get_name(pkg)) + "\t" + QString(files->files[i].name) + "\n";
+            }
+        }
+    }
+    return ret;
 }
 
 bool alpmInterface::parseName(QString name, QString *n, QString *v)
@@ -247,6 +608,15 @@ bool alpmInterface::initialize()
         // TODO: read siglevel from config
         alpm_register_syncdb(m_handle, m_repos[i].c_str(), ALPM_SIG_USE_DEFAULT);
     }
+    int ret = alpm_option_set_eventcb(m_handle, eventCallback);
+    ret = alpm_option_set_dlcb(m_handle, downloadProgressCallback);
+    ret = alpm_option_set_progresscb(m_handle, progressCallback);
+    ret = alpm_option_set_totaldlcb(m_handle, totalDownloadSizeCallback);
+    ret = alpm_option_set_questioncb(m_handle, questionCallback);
+
+    if (ret != 0) {
+        fprintf(stderr, "we got some number %d\n", ret);
+    }
     puts("ALPM initialized");
     return true;
 }
@@ -260,6 +630,7 @@ void alpmInterface::setLocation()
 
 void alpmInterface::setAvail(LcacheObj *)
 {
+    // todo: I think this means we should re-initialize with a new root
     if (!m_handle) {
         return;
     }

@@ -97,7 +97,7 @@ void managementWidget::setupWidgets()
 
   uinstButton = new QPushButton(i18n("Uninstall"),rightpanel);
   uinstButton->setEnabled(FALSE);
-  instButton = new QPushButton(i18n("Examine"),rightpanel);
+  instButton = new QPushButton(i18n("Install"),rightpanel);
   instButton->setEnabled(FALSE);
 
 
@@ -116,6 +116,8 @@ void managementWidget::setupWidgets()
 
   // Activate the layout managers
   vPan->activate(treeList,rightpanel);
+
+  treeList->setMultiSelection(FALSE);
 }
 
 int managementWidget::getPSeparator()
@@ -137,7 +139,7 @@ void managementWidget::setupInstButton(packageInfo *p)
 
     instButton->setEnabled(TRUE);
     uinstButton->setEnabled(FALSE);
-    instButton->setText(i18n("Examine"));
+    instButton->setText(i18n("Install"));
 
     disconnect(uinstButton, SIGNAL(clicked()), this,SLOT(uninstallClicked()));
     disconnect(instButton ,SIGNAL(clicked()), this,SLOT(examineClicked()));

@@ -7,6 +7,26 @@
 #include "kpackage.h"
 #include <fstream>
 
+namespace {
+// Keep in sync with the things below
+enum InstallOptions {
+    OnlyNeeded = 1 << 0,
+    AsDeps = 1 << 1,
+    IgnoreDeps = 1 << 2,
+    IgnoreScripts = 1 << 3,
+    DryRun = 1 << 4,
+    OnlyDB = 1 << 5,
+};
+enum UninstallOptions {
+    RemoveRevDeps = 1 << 0,
+    RemoveDeps = 1 << 1,
+    RemoveUnneeded = 1 << 2,
+    UninstIgnoreDeps = 1 << 3,
+    UninstDryRun = 1 << 4,
+    UninstOnlyDb = 1 << 5,
+};
+}
+
 static param pinstall[] =  {
   {"Only install needed",TRUE,FALSE},
   {"Mark as installed as a dependency",FALSE,FALSE},
@@ -442,6 +462,9 @@ static void progressCallback(alpm_progress_t type, const char *packageName, int 
 static void downloadProgressCallback(const char *filename, off_t xfered, off_t total)
 {
     off_t percent = 100 * xfered / total;
+    QString message;
+    message.sprintf("Downloading %s...", filename);
+    kpkg->kp->setStatus(message);
     kpkg->kp->setPercent(percent);
 }
 
@@ -741,6 +764,64 @@ bool alpmInterface::initialize()
     }
     puts("ALPM initialized");
     return true;
+}
+
+int alpmInterface::uninstall(int uninstallFlags, QListT<packageInfo> *p)
+{
+    if (geteuid() != 0) {
+        KpMsgE("KPackage needs to run as root to do useful stuff. Trust me, it's safe.", "", FALSE);
+        return -1;
+    }
+    packageInfo *i;
+    for (i = p->first(); i!= 0; i = p->next())  {
+        if (!uninstall(uninstallFlags, i)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int alpmInterface::uninstall(int uninstallFlags, packageInfo *p)
+{
+    if (geteuid() != 0) {
+        KpMsgE("KPackage needs to run as root to do useful stuff. Trust me, it's safe.", "", FALSE);
+        return -1;
+    }
+    // etc.
+    if (uninstallFlags & UninstDryRun) {
+
+    }
+    //TODO
+    return 0;
+}
+
+int alpmInterface::install(int installFlags, QListT<packageInfo> *p)
+{
+    if (geteuid() != 0) {
+        KpMsgE("KPackage needs to run as root to do useful stuff. Trust me, it's safe.", "", FALSE);
+        return -1;
+    }
+
+    puts("Installing list");
+    packageInfo *i;
+    for (i = p->first(); i!= 0; i = p->next())  {
+        if (!install(installFlags, i)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int alpmInterface::install(int installFlags, packageInfo *p)
+{
+    if (geteuid() != 0) {
+        KpMsgE("KPackage needs to run as root to do useful stuff. Trust me, it's safe.", "", FALSE);
+        return -1;
+    }
+
+    puts("Installing");
+    //TODO
+    return 0;
 }
 
 void alpmInterface::setLocation()

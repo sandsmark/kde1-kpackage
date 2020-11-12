@@ -328,13 +328,20 @@ void managementWidget::currentChanged(QListViewItem *p)
 // exmamine has been clicked
 void managementWidget::examineClicked()
 {
-  if (package) {
+  if (!package) {
+    return;
+  }
+
+  if (treeList->isMultiSelection()) { // waddafak
     QString url = package->getUrl();
     if (!url.isEmpty()) {
       kpkg->kp->openNetFile(url);
     } else {
       KpMsgE(i18n("Filename not available\n"),"",TRUE); 
     }
+    return;
+  } else {
+    package->interface->install(0, package);
   }
 }
 

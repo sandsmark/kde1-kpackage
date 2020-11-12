@@ -51,6 +51,13 @@ public:
         m_instantiated.erase(pkg);
     }
 
+    virtual int uninstall(int uninstallFlags, QList<packageInfo> *p);
+    virtual int uninstall(int uninstallFlags, packageInfo *p);
+    // uninstall package or packages
+
+    virtual int install(int installFlags, QList<packageInfo> *p);
+    virtual int install(int installFlags, packageInfo *p);
+
 public slots:
     void setLocation() override;
     void setAvail(LcacheObj *) override;

@@ -1,6 +1,9 @@
 #include "alpminterface.h"
 #include <alpm.h>
 #include <klocale.h>
+#include <kmsgbox.h>
+#include <qlayout.h>
+#include <qlistbox.h>
 #include "kpackage.h"
 #include <fstream>
 
@@ -244,26 +247,145 @@ static void eventCallback(alpm_event_t *event)
 }
 static void questionCallback(alpm_question_t *question)
 {
-    // TODO
+    QString message;
     switch(question->type) {
     case ALPM_QUESTION_INSTALL_IGNOREPKG:
+        message.sprintf(i18n("Install ignored package %s?"),
+                        alpm_pkg_get_name(question->install_ignorepkg.pkg)
+                        );
+        if (KMsgBox::yesNoCancel(kpkg->kp, "Question from ALPM", message) == 1) {
+            question->install_ignorepkg.install = 1;
+        } else {
+            question->install_ignorepkg.install = 0;
+        }
         break;
     case ALPM_QUESTION_REPLACE_PKG:
+        message.sprintf(i18n("Replace %s with %s?"),
+                        alpm_pkg_get_name(question->replace.oldpkg),
+                        alpm_pkg_get_name(question->replace.newpkg)
+                        );
+        if (KMsgBox::yesNoCancel(kpkg->kp, "Question from ALPM", message) == 1) {
+            question->replace.replace = 1;
+        } else {
+            question->replace.replace = 0;
+        }
         break;
     case ALPM_QUESTION_CONFLICT_PKG:
+        message.sprintf(i18n("%s conflicts with %s, remove %s?"),
+                        question->conflict.conflict->package1,
+                        question->conflict.conflict->package2,
+                        question->conflict.conflict->package2
+                        );
+        if (KMsgBox::yesNoCancel(kpkg->kp, "Question from ALPM", message) == 1) {
+            question->conflict.remove = 1;
+        } else {
+            question->conflict.remove = 1;
+        }
         break;
     case ALPM_QUESTION_CORRUPTED_PKG:
+        message.sprintf(i18n("Delete corrupt (%s) file %s?"),
+                        alpm_strerror(question->corrupted.reason),
+                        question->corrupted.filepath
+                        );
+        if (KMsgBox::yesNoCancel(kpkg->kp, "Question from ALPM", message) == 1) {
+            question->corrupted.remove = 1;
+        } else {
+            question->corrupted.remove = 0;
+        }
         break;
     case ALPM_QUESTION_REMOVE_PKGS:
+        message = "The following packages have unavailable dependencies, skip?:\n";
+        for (alpm_list_t *it = question->remove_pkgs.packages; it != NULL; it = it->next) {
+            message += alpm_pkg_get_name(reinterpret_cast<alpm_pkg_t*>(it->data));
+            if (it->next) {
+                message += ", ";
+            }
+        }
+        if (KMsgBox::yesNoCancel(kpkg->kp, "Question from ALPM", message) == 1) {
+            question->remove_pkgs.skip = 1;
+        } else {
+            question->remove_pkgs.skip = 0;
+        }
+
         break;
-    case ALPM_QUESTION_SELECT_PROVIDER:
+    case ALPM_QUESTION_SELECT_PROVIDER: {
+        // if there is a required version, we need to format it
+        const char *prefix = "";
+        const char *version = question->select_provider.depend->version;
+        switch(question->select_provider.depend->mod) {
+        case ALPM_DEP_MOD_ANY: version = ""; break;
+        case ALPM_DEP_MOD_EQ: prefix = "="; break;
+        case ALPM_DEP_MOD_GE: prefix = ">="; break;
+        case ALPM_DEP_MOD_LE: prefix = "<="; break;
+        case ALPM_DEP_MOD_GT: prefix = ">"; break;
+        case ALPM_DEP_MOD_LT: prefix = "<"; break;
+        default: puts("unhandled shit"); break;
+        }
+        message.sprintf(i18n("Please select a provider for the dependency %s%s%s"), question->select_provider.depend->name, prefix, version);
+
+        QDialog *dialog = new QDialog(kpkg->kp, "dependencyproviderselection", TRUE); // modal
+        dialog->setCaption(i18n("Select provider"));
+
+        QLabel *text = new QLabel(dialog);
+        text->setText(message);
+
+        // List the options
+        QListBox *options = new QListBox(dialog);
+        for (alpm_list_t *it = question->remove_pkgs.packages; it != NULL; it = it->next) {
+            options->insertItem(alpm_pkg_get_name(reinterpret_cast<alpm_pkg_t*>(it->data)));
+        }
+
+        // Layout nicely
+        QBoxLayout *layout = new QBoxLayout(dialog, QBoxLayout::TopToBottom);
+        layout->addWidget(text);
+        layout->addWidget(options);
+
+        // Get the choice
+        if (dialog->exec() == QDialog::Rejected || options->currentItem() == -1) {
+            question->select_provider.use_index = 0;
+            delete dialog;
+            return;
+        }
+        question->select_provider.use_index = options->currentItem();
+        delete dialog;
         break;
-    case ALPM_QUESTION_IMPORT_KEY:
+    }
+    case ALPM_QUESTION_IMPORT_KEY: {
+        alpm_pgpkey_t *key = question->import_key.key;
+        char created[12];
+        time_t time = (time_t) key->created;
+
+        if(strftime(created, 12, "%Y-%m-%d", localtime(&time)) == 0) {
+          strcpy(created, "(unknown)");
+        }
+
+        const char *format = NULL;
+        if (key->revoked) {
+            format = i18n("Import PGP key %u%c/%s, '%s', created: %s (revoked!)");
+        } else {
+            format = i18n("Import PGP key %u%c/%s, '%s', created: %s");
+        }
+
+        message.sprintf(format,
+                    key->length, key->pubkey_algo, key->fingerprint, key->uid, created
+                    );
+        if (KMsgBox::yesNoCancel(kpkg->kp, "Question from ALPM", message) == 1) {
+            question->import_key.import = 1;
+        } else {
+            question->import_key.import = 0;
+        }
         break;
+    }
     default:
         puts("Nope");
         break;
     }
+
+//    int choice = KMsgBox::yesNoCancel(kpkg->kp, "Question from ALPM", message);
+//    if (choice == 3) { // Cancel, should we abort the whole thing?
+//       alpm_trans_interrupt()
+//    }
+
 
 }
 static void progressCallback(alpm_progress_t type, const char *packageName, int percent, size_t total, size_t current)
